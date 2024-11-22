@@ -1,42 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "fileutil.h"
 
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Usage: %s <filename>\n", argv[0]);
+        return 1;
+    }
 
-int main(int argc, char *argv[])
-{
-	if (argc < 1)
-	{
-		fprintf(stderr, "Must supply a text file name\n");
-		exit(1);
-	}
-	
-	int lineCount;
-	char **lines = loadFileAA(argv[1], &lineCount);
-	
-	printf("File loaded.\n");
-	
-	while(1)
-	{
-		char target[100];
-		printf("Text to search for: ");
-		fgets(target, 100, stdin);
-		
-		// Trim newline
-		char *nl = strchr(target, '\n');
-		if (nl) *nl = '\0';
-		
-		if (strcmp(target, "DONE") == 0) break;
-		
-		char *found = substringSearchAA(target, lines, lineCount);
-		if (found)
-			printf("Found: %s\n", found);
-		else
-			printf("Not found!\n");
-	}
+    int size;
+    char **lines = loadFileAA(argv[1], &size);
 
-    freeAA(lines, lineCount);
+    char target[256];
+    while (1) {
+        printf("Enter a string to search (or DONE to quit): ");
+        fgets(target, sizeof(target), stdin);
+        target[strcspn(target, "\n")] = '\0';  // Remove newline
+
+        if (strcmp(target, "DONE") == 0) {
+            break;
+        }
+
+        char *result = substringSearchAA(target, lines, size);
+        if (result) {
+            printf("Found: %s\n", result);
+        } else {
+            printf("Not found\n");
+        }
+    }
+
+    freeAA(lines, size);  
+    return 0;
 }
-
